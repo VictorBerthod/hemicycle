@@ -1,4 +1,4 @@
-const API_BASE = 'http://127.0.0.1:8047/api';
+const API_BASE = 'http://127.0.0.1:8048/api';
 
 async function fetchApi<T>(path: string): Promise<T> {
 	const res = await fetch(`${API_BASE}${path}`);

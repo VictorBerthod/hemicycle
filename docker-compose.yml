@@ -2,13 +2,13 @@ services:
   backend:
     build: ./backend
     ports:
-      - "127.0.0.1:8047:8047"
+      - "127.0.0.1:8048:8048"
     volumes:
       - ./backend:/app
       - backend-data:/app/data
     environment:
       - PYTHONPATH=/app
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8047 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8048 --reload
 
   frontend:
     build: ./frontend
