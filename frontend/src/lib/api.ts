@@ -116,3 +116,31 @@ export function search(q: string) {
 export function getStats() {
 	return fetchApi<Stats>('/stats');
 }
+
+export interface GroupComposition {
+	acronyme: string;
+	nom: string;
+	count: number;
+}
+
+export function getComposition() {
+	return fetchApi<GroupComposition[]>('/groupes/composition');
+}
+
+export interface Dissidence {
+	scrutin_numero: number;
+	scrutin_titre: string;
+	scrutin_date: string;
+	depute_position: string;
+	groupe_position: string;
+}
+
+export interface DissidenceResult {
+	dissidences: Dissidence[];
+	total_votes: number;
+	taux_dissidence: number;
+}
+
+export function getDissidences(uid: string) {
+	return fetchApi<DissidenceResult>(`/deputes/${uid}/dissidences`);
+}

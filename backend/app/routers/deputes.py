@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import func
+from sqlalchemy import func, and_
 from sqlalchemy.orm import Session, joinedload
 
 from app.database import get_db
-from app.models import Depute, Scrutin, Vote
+from app.models import Depute, Groupe, Scrutin, Vote
 from app.schemas import DeputeDetail, DeputeListItem, DeputeVoteItem
 
 router = APIRouter(prefix="/api/deputes", tags=["deputes"])
@@ -80,3 +80,67 @@ def get_depute(uid: str, db: Session = Depends(get_db)):
         groupe=depute.groupe,
         recent_votes=recent_votes,
     )
+
+
+@router.get("/{uid}/dissidences")
+def get_dissidences(uid: str, db: Session = Depends(get_db)):
+    """Find votes where this deputy voted against the majority of their group."""
+    depute = db.query(Depute).filter(Depute.uid == uid).first()
+    if not depute:
+        raise HTTPException(status_code=404, detail="Depute not found")
+    if not depute.groupe_id:
+        return {"dissidences": [], "total_votes": 0, "taux_dissidence": 0}
+
+    # Get all votes by this deputy
+    depute_votes = (
+        db.query(Vote.scrutin_id, Vote.position)
+        .filter(Vote.depute_id == depute.id)
+        .all()
+    )
+
+    if not depute_votes:
+        return {"dissidences": [], "total_votes": 0, "taux_dissidence": 0}
+
+    # For each scrutin, find the majority position of the group
+    group_members = (
+        db.query(Depute.id)
+        .filter(Depute.groupe_id == depute.groupe_id)
+        .all()
+    )
+    group_member_ids = [m[0] for m in group_members]
+
+    dissidences = []
+    for scrutin_id, position in depute_votes:
+        # Count group votes for this scrutin
+        group_votes = (
+            db.query(Vote.position, func.count(Vote.id))
+            .filter(
+                Vote.scrutin_id == scrutin_id,
+                Vote.depute_id.in_(group_member_ids),
+            )
+            .group_by(Vote.position)
+            .all()
+        )
+        if not group_votes:
+            continue
+
+        # Majority = position with most votes in the group
+        majority_position = max(group_votes, key=lambda x: x[1])[0]
+
+        if position != majority_position:
+            scrutin = db.query(Scrutin).filter(Scrutin.id == scrutin_id).first()
+            if scrutin:
+                dissidences.append({
+                    "scrutin_numero": scrutin.numero,
+                    "scrutin_titre": scrutin.titre,
+                    "scrutin_date": scrutin.date_scrutin,
+                    "depute_position": position,
+                    "groupe_position": majority_position,
+                })
+
+    total = len(depute_votes)
+    return {
+        "dissidences": dissidences,
+        "total_votes": total,
+        "taux_dissidence": round(len(dissidences) / total * 100, 1) if total > 0 else 0,
+    }

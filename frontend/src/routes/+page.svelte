@@ -1,13 +1,17 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { getStats, type Stats } from '$lib/api';
+	import { getStats, getComposition, type Stats, type GroupComposition } from '$lib/api';
+	import Hemicycle from '$lib/components/Hemicycle.svelte';
 
 	let stats = $state<Stats | null>(null);
+	let composition = $state<GroupComposition[]>([]);
 	let error = $state('');
 
 	onMount(async () => {
 		try {
-			stats = await getStats();
+			const [s, c] = await Promise.all([getStats(), getComposition()]);
+			stats = s;
+			composition = c;
 		} catch (e) {
 			error = 'Impossible de charger les statistiques. Le backend est-il lance ?';
 		}
@@ -42,6 +46,10 @@
 				<span class="stat-label">groupes</span>
 			</div>
 		</div>
+	{/if}
+
+	{#if composition.length > 0}
+		<Hemicycle data={composition} />
 	{/if}
 
 	{#if error}
