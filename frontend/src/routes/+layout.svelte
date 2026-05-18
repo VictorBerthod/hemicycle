@@ -1,100 +1,51 @@
 <script lang="ts">
 	import '../app.css';
 	import type { Snippet } from 'svelte';
+	import { page } from '$app/state';
+	import TopBar from '$lib/components/TopBar.svelte';
+	import Footer from '$lib/components/Footer.svelte';
 
 	let { children }: { children: Snippet } = $props();
-	let searchQuery = $state('');
 
-	function handleSearch(e: Event) {
-		e.preventDefault();
-		if (searchQuery.trim().length >= 2) {
-			window.location.href = `/recherche?q=${encodeURIComponent(searchQuery.trim())}`;
-		}
+	type NavKey = 'accueil' | 'personnalites' | 'scrutins' | 'comparateur' | 'themes' | 'enquetes';
+
+	function routeToNavKey(path: string): NavKey | undefined {
+		if (path === '/') return 'accueil';
+		if (path.startsWith('/personnalites') || path.startsWith('/personnalite/')) return 'personnalites';
+		// Compat anciens chemins /deputes /depute/[uid]
+		if (path.startsWith('/deputes') || path.startsWith('/depute/')) return 'personnalites';
+		if (path.startsWith('/scrutins') || path.startsWith('/scrutin/')) return 'scrutins';
+		if (path.startsWith('/comparateur')) return 'comparateur';
+		if (path.startsWith('/themes')) return 'themes';
+		if (path.startsWith('/enquetes')) return 'enquetes';
+		return undefined;
 	}
+
+	let active = $derived(routeToNavKey(page.url.pathname));
 </script>
 
 <svelte:head>
-	<title>Hemicycle</title>
+	<title>[PROJET].fr — Transparence parlementaire</title>
 </svelte:head>
 
-<header>
-	<nav class="container">
-		<a href="/" class="logo">Hemicycle</a>
-		<div class="nav-links">
-			<a href="/deputes">Deputes</a>
-			<a href="/scrutins">Scrutins</a>
-		</div>
-		<form class="search-form" onsubmit={handleSearch} role="search">
-			<label for="search-input" class="sr-only">Rechercher</label>
-			<input
-				id="search-input"
-				type="search"
-				placeholder="Rechercher..."
-				bind:value={searchQuery}
-			/>
-		</form>
-	</nav>
-</header>
+<div class="layout">
+	<TopBar {active} />
 
-<main class="container">
-	{@render children()}
-</main>
+	<main>
+		{@render children()}
+	</main>
 
-<footer class="container">
-	<p>
-		Donnees publiques —
-		<a href="https://www.assemblee-nationale.fr" target="_blank" rel="noopener">Assemblee nationale</a>
-		| <a href="https://www.civix.fr" target="_blank" rel="noopener">CIVIX</a>
-	</p>
-</footer>
+	<Footer />
+</div>
 
 <style>
-	header {
-		border-bottom: 1px solid var(--border);
-		padding: 0.75rem 0;
-		margin-bottom: 2rem;
-	}
-
-	nav {
+	.layout {
+		min-height: 100vh;
 		display: flex;
-		align-items: center;
-		gap: 1.5rem;
-	}
-
-	.logo {
-		font-size: 1.3rem;
-		font-weight: 700;
-		color: var(--text);
-	}
-
-	.logo:hover {
-		text-decoration: none;
-		color: var(--accent);
-	}
-
-	.nav-links {
-		display: flex;
-		gap: 1rem;
-	}
-
-	.search-form {
-		margin-left: auto;
-	}
-
-	.search-form input {
-		width: 200px;
+		flex-direction: column;
 	}
 
 	main {
-		min-height: 70vh;
-		padding-bottom: 3rem;
-	}
-
-	footer {
-		border-top: 1px solid var(--border);
-		padding: 1.5rem 0;
-		text-align: center;
-		color: var(--text-muted);
-		font-size: 0.85rem;
+		flex: 1;
 	}
 </style>
