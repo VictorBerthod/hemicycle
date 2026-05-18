@@ -144,3 +144,32 @@ export interface DissidenceResult {
 export function getDissidences(uid: string) {
 	return fetchApi<DissidenceResult>(`/deputes/${uid}/dissidences`);
 }
+
+export interface EcartOut {
+	id: number;
+	depute_nom: string;
+	role: string | null;
+	groupe_acronyme: string | null;
+	photo_url: string | null;
+	quote_said: string;
+	quote_said_when: string | null;
+	vote_label: string;
+	vote_position: string | null;
+	vote_when: string | null;
+}
+
+export interface ThemeOut {
+	id: number;
+	slug: string;
+	nom: string;
+	description: string | null;
+	nb_scrutins: number;
+}
+
+export function getEcarts(limit = 4) {
+	return fetchApi<EcartOut[]>(`/ecarts?limit=${limit}`);
+}
+
+export function getThemes() {
+	return fetchApi<ThemeOut[]>('/themes');
+}
