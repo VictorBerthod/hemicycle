@@ -120,10 +120,9 @@
 
 	.photo {
 		width: 120px;
-		height: 120px;
-		border-radius: 50%;
+		height: 140px;
 		object-fit: cover;
-		background: var(--border);
+		background: var(--rule);
 	}
 
 	.header-info h1 {
@@ -183,10 +182,9 @@
 
 	.dissidence-bar {
 		display: flex;
-		height: 8px;
-		border-radius: 4px;
+		height: 10px;
 		overflow: hidden;
-		background: var(--border);
+		background: var(--rule);
 		margin: 0.5rem 0;
 	}
 

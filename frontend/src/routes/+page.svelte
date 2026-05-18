@@ -111,9 +111,8 @@
 
 	.cta {
 		padding: 0.75rem 1.5rem;
-		background: var(--accent);
-		color: #000;
-		border-radius: var(--radius);
+		background: var(--ink);
+		color: var(--bg);
 		font-weight: 600;
 	}
 

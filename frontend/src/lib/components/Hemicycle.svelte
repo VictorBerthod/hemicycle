@@ -182,10 +182,9 @@
 		font-size: 0.75rem;
 		background: none;
 		border: none;
-		color: var(--text);
+		color: var(--ink);
 		cursor: pointer;
 		padding: 0.2rem 0.4rem;
-		border-radius: 3px;
 		transition: opacity 0.2s;
 	}
 

@@ -148,11 +148,10 @@
 	}
 
 	.pagination button {
-		background: var(--bg-card);
-		color: var(--text);
-		border: 1px solid var(--border);
+		background: var(--paper);
+		color: var(--ink);
+		border: 1px solid var(--rule);
 		padding: 0.5rem 1rem;
-		border-radius: var(--radius);
 		cursor: pointer;
 	}
 

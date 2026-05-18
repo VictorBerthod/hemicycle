@@ -135,10 +135,9 @@
 
 	.photo {
 		width: 48px;
-		height: 48px;
-		border-radius: 50%;
+		height: 56px;
 		object-fit: cover;
-		background: var(--border);
+		background: var(--rule);
 	}
 
 	.info {
@@ -166,11 +165,10 @@
 	}
 
 	.pagination button {
-		background: var(--bg-card);
-		color: var(--text);
-		border: 1px solid var(--border);
+		background: var(--paper);
+		color: var(--ink);
+		border: 1px solid var(--rule);
 		padding: 0.5rem 1rem;
-		border-radius: var(--radius);
 		cursor: pointer;
 	}
 

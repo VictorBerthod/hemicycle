@@ -1,17 +1,68 @@
+/* ============================================================
+   [PROJET] — Design tokens (handoff §5)
+   Direction visuelle : presse écrite, palette crème, coins vifs.
+   ============================================================ */
+
 :root {
-	--bg: #0f0f0f;
-	--bg-card: #1a1a1a;
-	--bg-hover: #252525;
-	--text: #e0e0e0;
-	--text-muted: #888;
-	--accent: #4a9eff;
-	--pour: #2ecc71;
-	--contre: #e74c3c;
-	--abstention: #f39c12;
-	--border: #333;
-	--radius: 6px;
-	--max-width: 1100px;
+	/* Surfaces */
+	--bg: #f4f1ea;       /* fond principal — crème presse */
+	--bg-alt: #ebe6d8;   /* fond secondaire — bandeau, sidebar */
+	--paper: #fbf9f3;    /* fond carte / surface élevée */
+
+	/* Texte */
+	--ink: #1a1a1a;      /* texte principal, presque noir */
+	--ink-soft: #2c2a26; /* texte secondaire */
+	--muted: #66635a;    /* texte tertiaire, métadonnées */
+
+	/* Filets */
+	--rule: #d4cfc1;     /* séparateurs, bordures fines */
+
+	/* Accent éditorial */
+	--accent: #c8412e;       /* rouge presse — éditorial + écarts */
+	--accent-soft: #e8b5aa;
+	--accent-tint: #f6ebe7;  /* tint sur fond paper (col. "ce qui a été voté") */
+
+	/* Sémantique vote */
+	--pour: #1f6b3a;     /* vert profond */
+	--contre: #c8412e;   /* même rouge que l'accent (cohérence éditoriale) */
+	--abst: #b08a2e;     /* ocre */
+	--absent: #a8a39a;   /* gris (dashed border) */
+
+	/* Typographie */
+	--font-serif: 'Newsreader', 'Iowan Old Style', 'Apple Garamond', Georgia, serif;
+	--font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	--font-mono: 'IBM Plex Mono', 'SF Mono', Menlo, Consolas, monospace;
+
+	/* Échelle typographique (desktop 1440px) */
+	--type-display: clamp(2.5rem, 6vw, 5.5rem);  /* 84-88px */
+	--type-h1: clamp(2.25rem, 5vw, 4.5rem);       /* 64-72px */
+	--type-h2: clamp(1.75rem, 3.5vw, 2.625rem);   /* 36-42px */
+	--type-h3: clamp(1.375rem, 2.5vw, 2rem);      /* 26-32px */
+	--type-lede: clamp(1.125rem, 1.8vw, 1.625rem);/* 22-26px italic */
+	--type-body: clamp(1rem, 1.2vw, 1.1875rem);   /* 16-19px */
+	--type-small: 0.875rem;                       /* 14px */
+	--type-meta: 0.75rem;                         /* 12px mono caps */
+
+	/* Espacement et structure */
+	--page-pad-x: clamp(1rem, 4vw, 3.5rem);       /* 56px desktop, 16px mobile */
+	--section-pad-y: clamp(1.5rem, 3vw, 3rem);    /* 24-48px */
+	--gap-cards: 1.5rem;                           /* 24px entre cartes */
+
+	/* ---- Aliases rétrocompatibles (legacy : à supprimer
+	   au fur et à mesure que les pages sont refactorées) ---- */
+	--text: var(--ink);
+	--text-muted: var(--muted);
+	--bg-card: var(--paper);
+	--bg-hover: var(--bg-alt);
+	--border: var(--rule);
+	--abstention: var(--abst);
+	--radius: 0;
+	--max-width: 1280px;
 }
+
+/* ============================================================
+   Reset minimal
+   ============================================================ */
 
 * {
 	margin: 0;
@@ -19,108 +70,220 @@
 	box-sizing: border-box;
 }
 
+html {
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+}
+
 body {
-	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-family: var(--font-sans);
+	font-size: var(--type-body);
+	font-weight: 400;
 	background: var(--bg);
-	color: var(--text);
-	line-height: 1.6;
+	color: var(--ink);
+	line-height: 1.55;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4 {
+	font-family: var(--font-serif);
+	font-weight: 500;
+	line-height: 1.15;
+	letter-spacing: -0.005em;
+	color: var(--ink);
 }
 
 a {
-	color: var(--accent);
-	text-decoration: none;
+	color: var(--ink);
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 2px;
+	text-decoration-color: var(--rule);
+	transition: text-decoration-color 0.15s;
 }
 
 a:hover {
-	text-decoration: underline;
+	text-decoration-color: var(--ink);
 }
+
+em {
+	font-style: italic;
+}
+
+::selection {
+	background: var(--ink);
+	color: var(--bg);
+}
+
+/* ============================================================
+   Containers de page
+   ============================================================ */
 
 .container {
 	max-width: var(--max-width);
 	margin: 0 auto;
-	padding: 0 1rem;
+	padding: 0 var(--page-pad-x);
 }
 
+/* ============================================================
+   Helpers typographiques (utilisables en classe ou via composants)
+   ============================================================ */
+
+.mono {
+	font-family: var(--font-mono);
+	font-size: var(--type-meta);
+	letter-spacing: 0.04em;
+}
+
+.mono-caps {
+	font-family: var(--font-mono);
+	font-size: var(--type-meta);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}
+
+.serif {
+	font-family: var(--font-serif);
+}
+
+.lede {
+	font-family: var(--font-serif);
+	font-style: italic;
+	font-size: var(--type-lede);
+	color: var(--ink-soft);
+	line-height: 1.4;
+}
+
+.accent {
+	color: var(--accent);
+}
+
+/* ============================================================
+   Surfaces (style presse — coins vifs, fond papier)
+   Remplace les anciennes .card / .badge / .vote-bar legacy.
+   ============================================================ */
+
 .card {
-	background: var(--bg-card);
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
-	padding: 1rem;
+	background: var(--paper);
+	border: 1px solid var(--rule);
+	padding: 1.25rem;
 }
 
 .card:hover {
-	background: var(--bg-hover);
+	border-color: var(--ink);
 }
 
 .badge {
 	display: inline-block;
-	padding: 0.15rem 0.5rem;
-	border-radius: 3px;
-	font-size: 0.8rem;
-	font-weight: 600;
+	font-family: var(--font-mono);
+	font-size: var(--type-meta);
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	padding: 0.25rem 0.5rem;
+	background: var(--bg-alt);
+	color: var(--ink);
+	border: 1px solid var(--rule);
 }
 
-.badge-pour {
-	background: var(--pour);
-	color: #000;
-}
-
-.badge-contre {
-	background: var(--contre);
-	color: #fff;
-}
-
-.badge-abstention {
-	background: var(--abstention);
-	color: #000;
-}
-
+.badge-pour,
 .badge-adopte {
 	background: var(--pour);
-	color: #000;
+	color: var(--bg);
+	border-color: var(--pour);
 }
 
+.badge-contre,
 .badge-rejete {
 	background: var(--contre);
-	color: #fff;
+	color: var(--bg);
+	border-color: var(--contre);
+}
+
+.badge-abstention,
+.badge-abst {
+	background: var(--abst);
+	color: var(--bg);
+	border-color: var(--abst);
+}
+
+.badge-absent {
+	background: transparent;
+	color: var(--muted);
+	border: 1px dashed var(--muted);
 }
 
 .vote-bar {
 	display: flex;
-	height: 8px;
-	border-radius: 4px;
+	height: 10px;
+	background: var(--rule);
 	overflow: hidden;
-	background: var(--border);
 }
 
-.vote-bar .pour {
-	background: var(--pour);
-}
+.vote-bar .pour { background: var(--pour); }
+.vote-bar .contre { background: var(--contre); }
+.vote-bar .abstention,
+.vote-bar .abst { background: var(--abst); }
 
-.vote-bar .contre {
-	background: var(--contre);
-}
-
-.vote-bar .abstention {
-	background: var(--abstention);
-}
+/* ============================================================
+   Inputs (style presse — fond paper, border rule, pas de radius)
+   ============================================================ */
 
 input[type="text"],
 input[type="search"],
-select {
-	background: var(--bg-card);
-	color: var(--text);
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
-	padding: 0.5rem 0.75rem;
-	font-size: 0.9rem;
+input[type="email"],
+input[type="date"],
+select,
+textarea {
+	font-family: var(--font-sans);
+	font-size: var(--type-body);
+	background: var(--paper);
+	color: var(--ink);
+	border: 1px solid var(--rule);
+	padding: 0.625rem 0.875rem;
 }
 
 input:focus,
-select:focus {
-	outline: none;
-	border-color: var(--accent);
+select:focus,
+textarea:focus {
+	outline: 2px solid var(--ink);
+	outline-offset: -1px;
+	border-color: var(--ink);
 }
+
+input::placeholder {
+	color: var(--muted);
+}
+
+button {
+	font-family: var(--font-sans);
+	font-size: var(--type-small);
+	cursor: pointer;
+	background: none;
+	border: none;
+	color: inherit;
+}
+
+/* ============================================================
+   Filets éditoriaux
+   ============================================================ */
+
+.rule {
+	border-top: 1px solid var(--rule);
+}
+
+.rule-strong {
+	border-top: 1px solid var(--ink);
+}
+
+.rule-section {
+	border-top: 2px solid var(--ink);
+}
+
+/* ============================================================
+   Accessibilité
+   ============================================================ */
 
 .sr-only {
 	position: absolute;
@@ -131,4 +294,20 @@ select:focus {
 	overflow: hidden;
 	clip: rect(0, 0, 0, 0);
 	border: 0;
+}
+
+:focus-visible {
+	outline: 2px solid var(--ink);
+	outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
 }
