@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, func
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -83,3 +83,44 @@ class Vote(Base):
     # metadata
     source: Mapped[str] = mapped_column(String, default="nosdeputes.fr")
     synced_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class Ecart(Base):
+    """Documented discrepancy between a public statement and a parliamentary vote."""
+
+    __tablename__ = "ecarts"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    # Who said it
+    depute_nom: Mapped[str] = mapped_column(String)
+    role: Mapped[str | None] = mapped_column(String, nullable=True)
+    groupe_acronyme: Mapped[str | None] = mapped_column(String, nullable=True)
+    photo_url: Mapped[str | None] = mapped_column(String, nullable=True)
+
+    # What was said
+    quote_said: Mapped[str] = mapped_column(Text)
+    quote_said_when: Mapped[str | None] = mapped_column(String, nullable=True)
+
+    # What was voted
+    vote_label: Mapped[str] = mapped_column(String)
+    vote_position: Mapped[str | None] = mapped_column(String, nullable=True)
+    vote_when: Mapped[str | None] = mapped_column(String, nullable=True)
+
+    # Optional FK to actual scrutin/depute records
+    scrutin_id: Mapped[int | None] = mapped_column(ForeignKey("scrutins.id"), nullable=True, index=True)
+    depute_id: Mapped[int | None] = mapped_column(ForeignKey("deputes.id"), nullable=True, index=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class Theme(Base):
+    """Editorial thematic category for scrutins."""
+
+    __tablename__ = "themes"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    slug: Mapped[str] = mapped_column(String, unique=True, index=True)
+    nom: Mapped[str] = mapped_column(String)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    nb_scrutins: Mapped[int] = mapped_column(Integer, default=0)

@@ -30,12 +30,10 @@ def override_get_db():
         db.close()
 
 
-app.dependency_overrides[get_db] = override_get_db
-
-
 @pytest.fixture(autouse=True)
 def setup_db():
     """Create tables and seed data for each test."""
+    app.dependency_overrides[get_db] = override_get_db
     Base.metadata.create_all(engine)
     db = TestSession()
 
@@ -69,6 +67,7 @@ def setup_db():
     yield
 
     Base.metadata.drop_all(engine)
+    app.dependency_overrides.pop(get_db, None)
 
 
 client = TestClient(app)

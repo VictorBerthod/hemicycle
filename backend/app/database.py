@@ -20,5 +20,5 @@ def get_db():
 
 
 def init_db():
-    from app.models import Depute, Groupe, Scrutin, Vote  # noqa: F401
+    from app.models import Depute, Ecart, Groupe, Scrutin, Theme, Vote  # noqa: F401
     Base.metadata.create_all(bind=engine)

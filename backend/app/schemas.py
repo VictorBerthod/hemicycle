@@ -91,3 +91,28 @@ class StatsOut(BaseModel):
     total_scrutins: int
     total_votes: int
     derniere_sync: str | None = None
+
+
+class EcartOut(BaseModel):
+    id: int
+    depute_nom: str
+    role: str | None = None
+    groupe_acronyme: str | None = None
+    photo_url: str | None = None
+    quote_said: str
+    quote_said_when: str | None = None
+    vote_label: str
+    vote_position: str | None = None
+    vote_when: str | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class ThemeOut(BaseModel):
+    id: int
+    slug: str
+    nom: str
+    description: str | None = None
+    nb_scrutins: int = 0
+
+    model_config = {"from_attributes": True}

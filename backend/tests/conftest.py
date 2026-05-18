@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.database import Base
-from app.models import Depute, Groupe, Scrutin, Vote  # noqa: F401
+from app.models import Depute, Ecart, Groupe, Scrutin, Theme, Vote  # noqa: F401
 
 
 @pytest.fixture
