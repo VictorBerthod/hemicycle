@@ -3,6 +3,10 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
 	plugins: [sveltekit()],
+	resolve: {
+		// Ensures Svelte browser build is used in Vitest (avoids SSR mount error)
+		conditions: ['browser'],
+	},
 	test: {
 		environment: 'jsdom',
 		globals: true,
