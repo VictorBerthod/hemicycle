@@ -35,10 +35,16 @@
 </script>
 
 <svelte:head>
-	<title>Deputes — Hemicycle</title>
+	<title>Députés — [PROJET].fr</title>
 </svelte:head>
 
-<h1>Deputes</h1>
+<div class="page-wrap">
+<div class="page-banner">
+	<span>Découvrez le nouvel annuaire :</span>
+	<a href="/personnalites">Annuaire des personnalités →</a>
+</div>
+
+<h1>Députés</h1>
 
 <div class="filters">
 	<input
@@ -94,8 +100,25 @@
 		{/if}
 	</div>
 {/if}
+</div>
 
 <style>
+	.page-wrap { padding: 32px var(--page-pad-x); }
+
+	.page-banner {
+		background: var(--bg-alt);
+		border: 1px solid var(--rule);
+		border-left: 3px solid var(--accent);
+		padding: 10px 16px;
+		margin-bottom: 24px;
+		font-size: 14px;
+		display: flex;
+		gap: 12px;
+		align-items: center;
+	}
+
+	.page-banner a { color: var(--accent); font-weight: 600; }
+
 	h1 {
 		margin-bottom: 1.5rem;
 	}

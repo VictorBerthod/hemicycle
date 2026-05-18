@@ -1,19 +1,18 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { getScrutins, type ScrutinListItem } from '$lib/api';
+	import VoteBadge from '$lib/components/VoteBadge.svelte';
+	import VoteBar from '$lib/components/VoteBar.svelte';
 
 	let scrutins = $state<ScrutinListItem[]>([]);
 	let filterSort = $state('');
-	let page = $state(1);
+	let currentPage = $state(1);
 	let loading = $state(true);
 
 	async function load() {
 		loading = true;
 		try {
-			scrutins = await getScrutins({
-				page,
-				sort: filterSort || undefined
-			});
+			scrutins = await getScrutins({ page: currentPage, sort: filterSort || undefined });
 		} catch {
 			scrutins = [];
 		}
@@ -23,121 +22,113 @@
 	onMount(load);
 
 	function handleFilter() {
-		page = 1;
+		currentPage = 1;
 		load();
-	}
-
-	function voteBarStyle(s: ScrutinListItem) {
-		const total = s.nb_pour + s.nb_contre + s.nb_abstention;
-		if (total === 0) return '';
-		const pour = (s.nb_pour / total) * 100;
-		const contre = (s.nb_contre / total) * 100;
-		return `pour:${pour.toFixed(1)}%;contre:${contre.toFixed(1)}%`;
 	}
 </script>
 
 <svelte:head>
-	<title>Scrutins — Hemicycle</title>
+	<title>Scrutins — [PROJET].fr</title>
 </svelte:head>
 
-<h1>Scrutins</h1>
+<div class="page-wrap">
+	<h1>Scrutins</h1>
 
-<div class="filters">
-	<select bind:value={filterSort} onchange={handleFilter} aria-label="Filtrer par resultat">
-		<option value="">Tous les resultats</option>
-		<option value="adopte">Adoptes</option>
-		<option value="rejete">Rejetes</option>
-	</select>
+	<div class="filters">
+		<select bind:value={filterSort} onchange={handleFilter} aria-label="Filtrer par résultat">
+			<option value="">Tous les résultats</option>
+			<option value="adopte">Adoptés</option>
+			<option value="rejete">Rejetés</option>
+		</select>
+	</div>
+
+	{#if loading}
+		<p class="loading">Chargement…</p>
+	{:else if scrutins.length === 0}
+		<p class="empty">Aucun scrutin trouvé.</p>
+	{:else}
+		<table class="scrutins-table">
+			<thead>
+				<tr>
+					{#each ['n°', 'Titre', 'Date', 'Résultat', 'Répartition', 'Pour', 'Contre', 'Abst.'] as h (h)}
+						<th>{h}</th>
+					{/each}
+				</tr>
+			</thead>
+			<tbody>
+				{#each scrutins as s (s.id)}
+					<tr>
+						<td class="num"><a href="/scrutin/{s.numero}">n°{s.numero}</a></td>
+						<td class="titre"><a href="/scrutin/{s.numero}">{s.titre}</a></td>
+						<td class="date">{s.date_scrutin}</td>
+						<td><VoteBadge position={s.sort === 'adopte' ? 'adopte' : 'rejete'} /></td>
+						<td class="bar-cell"><VoteBar pour={s.nb_pour} contre={s.nb_contre} abst={s.nb_abstention} /></td>
+						<td class="vote-num pour">{s.nb_pour}</td>
+						<td class="vote-num contre">{s.nb_contre}</td>
+						<td class="vote-num abst">{s.nb_abstention}</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+
+		<div class="pagination">
+			{#if currentPage > 1}
+				<button onclick={() => { currentPage--; load(); }}>Précédent</button>
+			{/if}
+			<span>Page {currentPage}</span>
+			{#if scrutins.length === 20}
+				<button onclick={() => { currentPage++; load(); }}>Suivant</button>
+			{/if}
+		</div>
+	{/if}
 </div>
 
-{#if loading}
-	<p class="loading">Chargement...</p>
-{:else if scrutins.length === 0}
-	<p class="empty">Aucun scrutin trouve.</p>
-{:else}
-	<ul class="scrutins-list">
-		{#each scrutins as s}
-			<li>
-				<a href="/scrutin/{s.numero}" class="card scrutin-card">
-					<div class="scrutin-header">
-						<span class="scrutin-date">{s.date_scrutin}</span>
-						<span class="badge badge-{s.sort}">{s.sort}</span>
-					</div>
-					<p class="scrutin-titre">{s.titre}</p>
-					{#if s.nb_votants > 0}
-						<div class="vote-bar" role="img" aria-label="{s.nb_pour} pour, {s.nb_contre} contre, {s.nb_abstention} abstentions">
-							<div class="pour" style="width: {(s.nb_pour / (s.nb_pour + s.nb_contre + s.nb_abstention)) * 100}%"></div>
-							<div class="contre" style="width: {(s.nb_contre / (s.nb_pour + s.nb_contre + s.nb_abstention)) * 100}%"></div>
-							<div class="abstention" style="width: {(s.nb_abstention / (s.nb_pour + s.nb_contre + s.nb_abstention)) * 100}%"></div>
-						</div>
-						<div class="vote-counts">
-							<span class="count-pour">{s.nb_pour} pour</span>
-							<span class="count-contre">{s.nb_contre} contre</span>
-							<span class="count-abstention">{s.nb_abstention} abst.</span>
-						</div>
-					{/if}
-				</a>
-			</li>
-		{/each}
-	</ul>
-
-	<div class="pagination">
-		{#if page > 1}
-			<button onclick={() => { page--; load(); }}>Precedent</button>
-		{/if}
-		<span>Page {page}</span>
-		{#if scrutins.length === 20}
-			<button onclick={() => { page++; load(); }}>Suivant</button>
-		{/if}
-	</div>
-{/if}
-
 <style>
+	.page-wrap { padding: 32px var(--page-pad-x); }
+
 	h1 { margin-bottom: 1.5rem; }
 
 	.filters { margin-bottom: 1.5rem; }
 
-	.scrutins-list {
-		list-style: none;
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
+	.scrutins-table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 15px;
 	}
 
-	.scrutin-card {
-		display: block;
-		color: var(--text);
+	.scrutins-table thead tr { border-bottom: 2px solid var(--ink); }
+
+	.scrutins-table th {
+		text-align: left;
+		padding: 10px 14px;
+		font-family: var(--font-mono);
+		font-size: 11px;
+		font-weight: 600;
+		color: var(--muted);
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
 	}
 
-	.scrutin-card:hover { text-decoration: none; }
+	.scrutins-table tbody tr { border-bottom: 1px solid var(--rule); }
+	.scrutins-table td { padding: 14px; vertical-align: middle; }
 
-	.scrutin-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 0.5rem;
+	.num a {
+		font-family: var(--font-mono);
+		color: var(--accent);
+		font-weight: 600;
+		text-decoration: none;
 	}
 
-	.scrutin-date {
-		font-size: 0.85rem;
-		color: var(--text-muted);
-	}
+	.titre a { color: var(--ink); text-decoration: none; font-family: var(--font-serif); font-size: 17px; }
+	.titre a:hover { text-decoration: underline; text-decoration-color: var(--rule); }
 
-	.scrutin-titre {
-		font-size: 0.95rem;
-		margin-bottom: 0.5rem;
-	}
+	.date { font-family: var(--font-mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
+	.bar-cell { min-width: 160px; }
 
-	.vote-counts {
-		display: flex;
-		gap: 1rem;
-		font-size: 0.8rem;
-		margin-top: 0.35rem;
-	}
-
-	.count-pour { color: var(--pour); }
-	.count-contre { color: var(--contre); }
-	.count-abstention { color: var(--abstention); }
+	.vote-num { font-family: var(--font-mono); font-weight: 600; }
+	.vote-num.pour   { color: var(--pour); }
+	.vote-num.contre { color: var(--contre); }
+	.vote-num.abst   { color: var(--abst); }
 
 	.pagination {
 		display: flex;
@@ -147,17 +138,9 @@
 		margin-top: 2rem;
 	}
 
-	.pagination button {
-		background: var(--paper);
-		color: var(--ink);
-		border: 1px solid var(--rule);
-		padding: 0.5rem 1rem;
-		cursor: pointer;
-	}
-
 	.loading, .empty {
 		text-align: center;
-		color: var(--text-muted);
+		color: var(--muted);
 		padding: 2rem;
 	}
 </style>
