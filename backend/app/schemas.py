@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class GroupeOut(BaseModel):
@@ -11,6 +11,36 @@ class GroupeOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class TagOut(BaseModel):
+    id: int
+    slug: str
+    libelle: str
+    categorie: str
+    couleur: str | None = None
+    description: str | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class TagCreate(BaseModel):
+    libelle: str = Field(min_length=1, max_length=80)
+    categorie: str = Field(min_length=1, max_length=40)
+    couleur: str | None = Field(default=None, max_length=20)
+    description: str | None = None
+    slug: str | None = Field(default=None, max_length=80)
+
+
+class TagUpdate(BaseModel):
+    libelle: str | None = Field(default=None, max_length=80)
+    categorie: str | None = Field(default=None, max_length=40)
+    couleur: str | None = Field(default=None, max_length=20)
+    description: str | None = None
+
+
+class TagAttach(BaseModel):
+    source: str = Field(default="manuel", max_length=40)
+
+
 class DeputeListItem(BaseModel):
     uid: str
     slug: str
@@ -20,6 +50,7 @@ class DeputeListItem(BaseModel):
     circo_numero: int | None = None
     photo_url: str | None = None
     groupe: GroupeOut | None = None
+    tags: list[TagOut] = []
 
     model_config = {"from_attributes": True}
 
@@ -72,7 +103,11 @@ class DeputeDetail(BaseModel):
     date_mandat_debut: str | None = None
     photo_url: str | None = None
     url_an: str | None = None
+    profession: str | None = None
+    mandats_anterieurs: str | None = None
+    bio_short: str | None = None
     groupe: GroupeOut | None = None
+    tags: list[TagOut] = []
     recent_votes: list[DeputeVoteItem] = []
 
     model_config = {"from_attributes": True}

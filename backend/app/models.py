@@ -1,9 +1,12 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+
+TAG_CATEGORIES = ("parti", "poste", "commission", "profession", "mandat", "libre")
 
 
 class Groupe(Base):
@@ -42,6 +45,17 @@ class Depute(Base):
     groupe: Mapped["Groupe | None"] = relationship(back_populates="deputes")
 
     votes: Mapped[list["Vote"]] = relationship(back_populates="depute")
+
+    # Enriched profile fields (filled via ETL or manual editorial work)
+    profession: Mapped[str | None] = mapped_column(String, nullable=True)
+    mandats_anterieurs: Mapped[str | None] = mapped_column(Text, nullable=True)
+    bio_short: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    tags: Mapped[list["Tag"]] = relationship(
+        secondary="depute_tags",
+        back_populates="deputes",
+        lazy="selectin",
+    )
 
     # metadata
     source: Mapped[str] = mapped_column(String, default="nosdeputes.fr")
@@ -124,3 +138,35 @@ class Theme(Base):
     nom: Mapped[str] = mapped_column(String)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     nb_scrutins: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class Tag(Base):
+    """Typed label attachable to a deputy (party, role, commission, free-form)."""
+
+    __tablename__ = "tags"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    slug: Mapped[str] = mapped_column(String, unique=True, index=True)
+    libelle: Mapped[str] = mapped_column(String)
+    categorie: Mapped[str] = mapped_column(String, index=True)
+    couleur: Mapped[str | None] = mapped_column(String, nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    deputes: Mapped[list["Depute"]] = relationship(
+        secondary="depute_tags",
+        back_populates="tags",
+    )
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class DeputeTag(Base):
+    """Association table linking deputies and tags with provenance."""
+
+    __tablename__ = "depute_tags"
+    __table_args__ = (UniqueConstraint("depute_id", "tag_id", name="uq_depute_tag"),)
+
+    depute_id: Mapped[int] = mapped_column(ForeignKey("deputes.id", ondelete="CASCADE"), primary_key=True)
+    tag_id: Mapped[int] = mapped_column(ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True)
+    source: Mapped[str] = mapped_column(String, default="manuel")
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
